@@ -265,3 +265,34 @@ function exportToExcel(tableId, filename) {
     };
     document.head.appendChild(script);
 }
+// 财务端专用的Excel导出（使用已有的exportToExcel函数）
+function exportFinanceTable(tableId, filename) {
+    if (typeof exportToExcel === 'function') {
+        exportToExcel(tableId, filename);
+        addAuditLog('报表导出', '导出' + filename, '-', '文件：' + filename);
+    } else {
+        console.error('exportToExcel函数未定义');
+        alert('导出功能暂不可用');
+    }
+}
+
+// 从API获取数据并导出（需要后端支持）
+function exportFromFinanceAPI(reportType, filename, params) {
+    var url = FinanceAPI.getReportUrl(reportType, params);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = filename + '_' + formatDateForFilename(new Date()) + '.xlsx';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    addAuditLog('报表导出', '导出' + filename, '-', '参数：' + JSON.stringify(params));
+}
+
+// 文件名日期格式化
+function formatDateForFilename(date) {
+    var year = date.getFullYear();
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var day = String(date.getDate()).padStart(2, '0');
+    return year + month + day;
+}
